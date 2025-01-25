@@ -18,9 +18,16 @@ file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelnam
 logger.addHandler(file_handler)
 
 
+# Global settings
+MAX_REQUESTS = 200
+TIME_WINDOW = 60
+BLOCKED_IPS = ["0.69.42.0", "10.69.42.0"]
+REDIR_PREFIX = "http://127.0.0.1:8080/proxy"
+
+
 # Rate limiter for client IPs
 class RateLimiter:
-    def __init__(self, max_requests=200, time_window=60):
+    def __init__(self, max_requests=MAX_REQUESTS, time_window=TIME_WINDOW):
         self.request_counts: Dict[str, list[float]] = {}
         self.max_requests = max_requests
         self.time_window = time_window
@@ -47,7 +54,9 @@ class ProxyServer:
     def __init__(self):
         self.app = Quart(__name__)
         self.rate_limiter = RateLimiter()
-        self.blocked_ips = set()
+        #self.blocked_ips = set()
+        self.blocked_ips = BLOCKED_IPS
+        self.href_prefix = REDIR_PREFIX
         self.setup_routes()
 
     def setup_routes(self):
@@ -137,6 +146,10 @@ class ProxyServer:
             for name, value in response.headers.items()
             if name.lower() not in ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
         }
+
+        if "text/html" in response.headers.get("Content-Type", ""):
+            content = self.prefix_href_tags(content, response.real_url)
+
         return Response(content, status=response.status, headers=headers)
 
     def decompress_content(self, content: bytes, encoding: str) -> bytes:
@@ -147,14 +160,25 @@ class ProxyServer:
             return zlib.decompress(content)
         return content
     
-    def prefix_href_tags(html_content, prefix):
+    def prefix_href_tags(self, html_content, current_url=None):
+        logger.info(f"Current URL: {current_url}")
+        with open("test.txt", "a") as f:
+            f.write(f"Current URL: {current_url}\n")
+
         """Modifies all href attributes in the HTML content by adding the specified prefix."""
+        prefix = self.href_prefix
         soup = BeautifulSoup(html_content, "html.parser")
         for tag in soup.find_all("a", href=True):
             original_href = tag["href"]
             # Avoid double-prefixing if the prefix is already present
             if not original_href.startswith(prefix):
-                tag["href"] = f"{prefix}{original_href}"
+                if original_href.startswith("http"):
+                    tag["info"] = f"{prefix}/{original_href}"
+                    logger.debug(f"Modified href: {tag['href']}")
+                else:
+                    tag["href"] = f"{prefix}/{current_url}{original_href}"
+                    logger.info(f"Modified href: {tag['href']}")
+
         return str(soup)
 
     async def websocket_proxy(self, path: str):

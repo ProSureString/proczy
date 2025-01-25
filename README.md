@@ -1,4 +1,4 @@
-# Advanced Proxy Server
+# Proczy - Open Source Proxy Server
 
 ## Features
 
@@ -13,18 +13,32 @@
 
 ## Installation
 
+(Windows)
 1. Clone the repository
-2. Install dependencies:
+2. Navigate to the repository.
+    ```bash
+    cd proczy
+    ```
+3. Create a python virtual environment
+    ```bash
+    python -m venv venv
+    ```
+4. Activate the virtual environment
+    ```bash
+    .\venv\Scripts\activate
+    ```
+5. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
 ## Configuration
 
-Modify server settings in the `ProxyServer` class:
+Modify settings and constants at the top of the file:
 - Adjust rate limits
 - Configure IP blocking
 - Customize logging
+- Set redirect prefix
 
 ## Running the Server
 
@@ -38,6 +52,7 @@ Default:
 - Debug: True
 
 ## Notes
+- Please make sure to set config!
 - Please use in controlled environments(ideally for home or personal use, that's what i created it for.)
 - Please create an issue on github for any issue you find!
 
