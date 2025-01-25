@@ -153,6 +153,7 @@
             margin-bottom: 1rem;
             font-weight: 700;
             background: linear-gradient(45deg, var(--blurple-light), var(--blurple-accent));
+            background-clip: text; /*for compatibility with older browsers, vscode told me so or something idk*/
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -214,6 +215,7 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
+            display: none;
         }
 
         .features {
@@ -291,7 +293,7 @@
             <ul class="nav-links">
                 <li><a href="#home" id="homebtn">Home</a></li>
                 <li><a href="#features" id="featuresbtn">Features</a></li>
-                <li><a href="#about" id="aboutbtn" onclick="alert('this is big comedy, please take everything here with a grain of salt. the goal of this website is to mostly just do a silly, i wasnt very serious while making it')">About</a></li> 
+                <li><a href="#about" id="aboutbtn" onclick="alert('this page has a lot of comedy lol, im sorry, i wasnt too serious while making it, but i hope you enjoy it')">About</a></li> 
                 <li><a href="#" id="contactbtn">Contact</a></li> <!-- DONE todo: Replace this with a contact form or something idk--> <!-- wow i actually finished the todo im so cool fr-->
             </ul>
         </div>
@@ -304,7 +306,7 @@
             
             <div class="proxy-input">
                 <input type="text" id="urlInput" placeholder="Enter URL to proxy (e.g., https://example.com)">
-                <button class="proxy-btn" onclick="proxyUrl()">ok cool lets see</button>
+                <button id="proxybtn" class="proxy-btn" onclick="proxyUrl()">ok cool lets see</button>
             </div>
             
             <div id="proxyResult"></div>
@@ -348,11 +350,12 @@
                 // Validate URL
                 new URL(url);
 
+                location.href = "/proxy/" + encodeURIComponent(url);
+
                 // okay now i just visit the backend /proxy/<url> route
                 proxyResult.innerHTML = `
                     <p>Proxying URL: <strong style="color: var(--blurple-light);">${url}</strong></p>
-                    <p style="color: var(--text-gray);">Note: This is a mock proxy. In a real application, 
-                    the proxied content would be displayed here securely.</p>
+                    <iframe src="/proxy/${encodeURIComponent(url)}" frameborder="0" width="95%" height="80%"></iframe>
                 `;
             } catch (error) {
                 // tf you inputting lol x3
@@ -369,15 +372,22 @@
             content: `
                 You can contact me on discord @prosurestring, 
                 or email me at: prosurestring@prosurestring.xyz`,
-            widthMultiplier: 0.5,
+            widthMultiplier: 0.75,
             heightMultiplier: 0.5,
-            backgroundColor: --blurple-medium,
-            titleColor: --blurple-light,
-            textColor:  --blurple-accent
+            fontSizeMultiplier: 0.75,
+            backgroundColor: "#424c87",
+            titleColor: "#7289DA",
+            textColor:  "#9BA3FF"
         });
 
+        const contactbtn = document.getElementById('contactbtn');
         contactbtn.addEventListener('click', () => {
             contactPopup.show();
+        });
+
+        const proxybtn = document.getElementById('proxybtn');
+        proxybtn.addEventListener('click', () => {
+            
         });
     </script>
 </body>

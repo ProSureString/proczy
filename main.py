@@ -102,6 +102,9 @@ class ProxyServer:
         # Optional: Rewrite User-Agent
         headers['User-Agent'] = self.rewrite_user_agent(headers.get('User-Agent', ''))
 
+        # Optional: Rewrite X-Frame-Options for display on main page(doesn't work :sob:)
+        headers.pop('X-Frame-Options', None)
+
         return {
             'method': request.method,
             'url': target_url,
