@@ -7,6 +7,8 @@ import asyncio
 from typing import Dict, Any
 import gzip
 import zlib
+from bs4 import BeautifulSoup
+
 
 # Configure logging with rotation
 logging.basicConfig(level=logging.INFO)
@@ -144,6 +146,16 @@ class ProxyServer:
         elif encoding == 'deflate':
             return zlib.decompress(content)
         return content
+    
+    def prefix_href_tags(html_content, prefix):
+        """Modifies all href attributes in the HTML content by adding the specified prefix."""
+        soup = BeautifulSoup(html_content, "html.parser")
+        for tag in soup.find_all("a", href=True):
+            original_href = tag["href"]
+            # Avoid double-prefixing if the prefix is already present
+            if not original_href.startswith(prefix):
+                tag["href"] = f"{prefix}{original_href}"
+        return str(soup)
 
     async def websocket_proxy(self, path: str):
         """WebSocket Proxy route."""

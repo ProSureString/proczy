@@ -5,3 +5,4 @@ PyJWT
 requests
 typing-extensions
 urllib3
+bs4
