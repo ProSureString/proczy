@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 
+    
+        i like not removing comments i wrote in development while thinking, shows a teensy tiny bit of how i think or something idk
+        
+            "or something idk"
+        -ProSureString, 2025
+    
+    -->
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proczy - Secure Web Browsing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@simondmc/popup-js@1.4.3/popup.min.js"></script>
+    <style>
+        :root {
+            --blurple-darkest: #2a2f4a;
+            --blurple-dark: #373e6b;
+            --blurple-medium: #424c87;
+
+            /*
+            --blurple-darkest: #1A1E23;
+            --blurple-dark: #2C2F33;
+            --blurple-medium: #23272A;
+            */
+
+            --blurple-light: #7289DA;
+            --blurple-accent: #9BA3FF;
+            --text-white: #FFFFFF;
+            --text-gray: #B9BBBE;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--blurple-darkest) 0%, var(--blurple-medium) 100%);
+            color: var(--text-white);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background-color: var(--blurple-darkest);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--blurple-light);
+            text-shadow: 0 0 10px rgba(114, 137, 218, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--blurple-light);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-white);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .proxy-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .proxy-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--blurple-light), var(--blurple-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .proxy-section p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+        }
+
+        .proxy-input {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #urlInput {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid transparent;
+            background: var(--blurple-darkest);
+            color: var(--text-white);
+            border-radius: 50px 0 0 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        #urlInput:focus {
+            outline: none;
+            border-color: var(--blurple-light);
+            box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.3);
+        }
+
+        .proxy-btn {
+            background: linear-gradient(135deg, var(--blurple-light), var(--blurple-accent));
+            color: var(--text-white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0 50px 50px 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .proxy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+        }
+
+        #proxyResult {
+            margin-top: 2rem;
+            background: var(--blurple-dark);
+            padding: 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            gap: 2rem;
+        }
+
+        .feature {
+            flex-basis: 30%;
+            background: var(--blurple-darkest);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--blurple-light);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 15px rgba(114, 137, 218, 0.5);
+        }
+
+        .feature h3 {
+            margin-bottom: 1rem;
+            color: var(--text-white);
+        }
+
+        .feature p {
+            color: var(--text-gray);
+        }
+
+        footer {
+            background-color: var(--blurple-darkest);
+            backdrop-filter: blur(10px);
+            color: var(--text-gray);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none; /* todo: For mobile, i should typically replace this with a hamburger menu, butz im too lazy :speaking_head: */
+            }
+
+            .proxy-input {
+                flex-direction: column;
+            }
+
+            #urlInput, .proxy-btn {
+                width: 100%;
+                border-radius: 50px;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container nav">
+            <div class="logo">Proczy</div>
+            <ul class="nav-links">
+                <li><a href="#home" id="homebtn">Home</a></li>
+                <li><a href="#features" id="featuresbtn">Features</a></li>
+                <li><a href="#about" id="aboutbtn" onclick="alert('this is big comedy, please take everything here with a grain of salt. the goal of this website is to mostly just do a silly, i wasnt very serious while making it')">About</a></li> 
+                <li><a href="#" id="contactbtn">Contact</a></li> <!-- DONE todo: Replace this with a contact form or something idk--> <!-- wow i actually finished the todo im so cool fr-->
+            </ul>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="proxy-section" id="home">
+            <h1>Proczy</h1>
+            <p>Browse the web with a proxy or something idk</p>
+            
+            <div class="proxy-input">
+                <input type="text" id="urlInput" placeholder="Enter URL to proxy (e.g., https://example.com)">
+                <button class="proxy-btn" onclick="proxyUrl()">ok cool lets see</button>
+            </div>
+            
+            <div id="proxyResult"></div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="feature">
+                <div class="feature-icon">🔓</div>
+                <h3>Open Source</h3>
+                <p>Proczy is an open-source project, available on <a href="https://github.com/ProSureString/Proczy">GitHub</a> here.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏡</div>
+                <h3>Self Hosted</h3>
+                <p>Proczy can be self-hosted, meaning you can run it on your own server, offering complete privacy and freedom.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🧠</div>
+                <h3>I forgor</h3>
+                <p>what should i put here, 3 cards look cool or something idk</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ProSureString. Open Source Browsing, Unlimited Access or something idk.</p>
+    </footer>
+
+    <script>
+        function proxyUrl() {
+            const urlInput = document.getElementById('urlInput');
+            const proxyResult = document.getElementById('proxyResult');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                proxyResult.innerHTML = '<p style="color: #FF6B6B;">Please enter a valid URL</p>';
+                return;
+            }
+
+            try {
+                // Validate URL
+                new URL(url);
+
+                // okay now i just visit the backend /proxy/<url> route
+                proxyResult.innerHTML = `
+                    <p>Proxying URL: <strong style="color: var(--blurple-light);">${url}</strong></p>
+                    <p style="color: var(--text-gray);">Note: This is a mock proxy. In a real application, 
+                    the proxied content would be displayed here securely.</p>
+                `;
+            } catch (error) {
+                // tf you inputting lol x3
+                proxyResult.innerHTML = '<p style="color: #FF6B6B;">Invalid URL. Please enter a valid URL with http:// or https://</p>';
+            }
+        }
+    </script>
+
+    <script>
+        //okay now we use popup.js hopefully
+        const contactPopup = new Popup({
+            id: "contact-popup",
+            title: "Contact Me",
+            content: `
+                You can contact me on discord @prosurestring, 
+                or email me at: prosurestring@prosurestring.xyz`,
+            widthMultiplier: 0.5,
+            heightMultiplier: 0.5,
+            backgroundColor: --blurple-medium,
+            titleColor: --blurple-light,
+            textColor:  --blurple-accent
+        });
+
+        contactbtn.addEventListener('click', () => {
+            contactPopup.show();
+        });
+    </script>
+</body>
+</html>

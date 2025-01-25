@@ -1,0 +1,7 @@
+quart
+aiohttp
+websockets
+PyJWT
+requests
+typing-extensions
+urllib3
