@@ -56,6 +56,13 @@ Default:
 - Please use in controlled environments(ideally for home or personal use, that's what i created it for.)
 - Please create an issue on github for any issue you find!
 
+## TODOs:
+
+- make it not absolute dogshit
+- make it actually fully work
+- make it replace all hrefs fully with proxied links
+- fix 301's
+
 
 ## Contributing
 
