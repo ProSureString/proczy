@@ -8,6 +8,7 @@ from typing import Dict, Any
 import gzip
 import zlib
 from bs4 import BeautifulSoup
+import re
 
 
 # Configure logging with rotation
@@ -22,7 +23,7 @@ logger.addHandler(file_handler)
 MAX_REQUESTS = 200
 TIME_WINDOW = 60
 BLOCKED_IPS = ["0.69.42.0", "10.69.42.0"]
-REDIR_PREFIX = "http://127.0.0.1:8080/proxy"
+REDIR_PREFIX = "http://127.0.0.1:8080/proxy/"
 
 
 # Rate limiter for client IPs
@@ -111,7 +112,7 @@ class ProxyServer:
         }
 
         # Optional: Rewrite User-Agent
-        headers['User-Agent'] = self.rewrite_user_agent(headers.get('User-Agent', ''))
+        headers['User-Agent'] = headers.get('User-Agent', '')
 
         # Optional: Rewrite X-Frame-Options for display on main page(doesn't work :sob:)
         headers.pop('X-Frame-Options', None)
@@ -125,10 +126,6 @@ class ProxyServer:
             'allow_redirects': False,
             'ssl': self.get_ssl_context()
         }
-
-    def rewrite_user_agent(self, original_ua: str) -> str:
-        """Rewrite the User-Agent header."""
-        return original_ua
 
     def get_ssl_context(self) -> ssl.SSLContext:
         """Create an SSL context."""
@@ -148,7 +145,8 @@ class ProxyServer:
         }
 
         if "text/html" in response.headers.get("Content-Type", ""):
-            content = self.prefix_href_tags(content, response.real_url)
+            content = self.replace_srcs(content, response.real_url)
+            content = self.replace_hrefs(content, response.real_url)
 
         return Response(content, status=response.status, headers=headers)
 
@@ -160,12 +158,16 @@ class ProxyServer:
             return zlib.decompress(content)
         return content
     
-    def prefix_href_tags(self, html_content, current_url=None):
+    """
+
+    OLD CODE
+
+    def edit_other_links(self, html_content, current_url=None):
         logger.info(f"Current URL: {current_url}")
         with open("test.txt", "a") as f:
             f.write(f"Current URL: {current_url}\n")
 
-        """Modifies all href attributes in the HTML content by adding the specified prefix."""
+        # Modifies all(only <a> rn lmao) href attributes in the HTML content by adding the specified URL prefix.
         prefix = self.href_prefix
         soup = BeautifulSoup(html_content, "html.parser")
         for tag in soup.find_all("a", href=True):
@@ -180,6 +182,99 @@ class ProxyServer:
                     logger.info(f"Modified href: {tag['href']}")
 
         return str(soup)
+    """
+    
+    def replace_srcs(self, html_content_b, current_url):
+
+        current_url = str(current_url)
+
+        prefix = self.href_prefix
+        html_content = ""
+
+        logger.info(f"Current URL: {current_url}")
+        with open("test.txt", "a") as f:
+            f.write(f"Current URL: {current_url}\n")
+            
+        try:
+            html_content = html_content_b.decode('utf-8')
+        except Exception as e:
+            logger.error(f"Error decoding HTML contentsrc: {e}")
+            return f"Error decoding HTML contentsrc: {e}"
+
+
+        def replacement_function(match):
+            src = match.group(1)  
+            with open("test.txt", "a") as f:
+                f.write(f"Current src: {src}\n")
+            
+            print(src)
+
+            # absolute URLs
+            if src.startswith(('http://', 'https://')):
+                return f'src="{prefix}{src}"'
+            
+            # relative URLs
+            elif src.startswith('/'):
+                # gotta remove potential double slashes don't ask me why
+                clean_src = current_url.rstrip('/') + '/' + src.lstrip('/')
+                return f'src="{prefix}{clean_src}"'
+            
+            # relative URLs *without* leading slash
+            else:
+                clean_src = f"{current_url.rstrip('/')}/{src}"
+                return f'src="{prefix}{clean_src}"'
+        
+        # I *think* pattern should matche src="..." with any content inside the quotes(dpes)
+        pattern = r'src="([^"]*)"'
+
+        # replace all matches using the replacement function, pls work(SPOILER, IT WORKS NOW :3)
+        return re.sub(pattern, replacement_function, html_content)
+
+    def replace_hrefs(self, html_content, current_url):
+
+        current_url = str(current_url)
+
+        prefix = self.href_prefix
+
+        logger.info(f"Current URL: {current_url}")
+        with open("test.txt", "a") as f:
+            f.write(f"Current URL: {current_url}\n")
+
+        """
+        try:
+            html_content = html_content_b.decode('utf-8')
+        except Exception as e:
+            logger.error(f"Error decoding HTML contenthref: {e}")
+            return f"Error decoding HTML contenthref: {e}"
+        """
+
+        def replacement_function(match):
+            href = match.group(1)  
+            with open("test.txt", "a") as f:
+                f.write(f"Current href: {href}\n")
+            
+            print(href)
+
+            # absolute URLs
+            if href.startswith(('http://', 'https://')):
+                return f'href="{prefix}{href}"'
+            
+            # relative URLs
+            elif href.startswith('/'):
+                # gotta remove potential double slashes don't ask me why
+                clean_href = current_url.rstrip('/') + '/' + href.lstrip('/')
+                return f'href="{prefix}{clean_href}"'
+            
+            # relative URLs *without* leading slash
+            else:
+                clean_href = f"{current_url.rstrip('/')}/{href}"
+                return f'href="{prefix}{clean_href}"'
+        
+        # I *think* pattern should matche href="..." with any content inside the quotes(dpes)
+        pattern = r'href="([^"]*)"'
+
+        # replace all matches using the replacement function, pls work(SPOILER, IT WORKS NOW :3)
+        return re.sub(pattern, replacement_function, html_content)
 
     async def websocket_proxy(self, path: str):
         """WebSocket Proxy route."""

@@ -11,6 +11,9 @@
     -->
     
     <meta charset="UTF-8">
+    <meta name="description" content="Simple proxy that allows you to browse the web with a proxy or something idk">
+    <meta name="keywords" content="Proxy, Proczy, prosurestring, ProSureString, proczy, proxy open source, proczy simple, hackclub, highseas, or something idk, hahasosilly:3">
+    <meta name="author" content="ProSureString">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proczy - Secure Web Browsing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -265,6 +268,28 @@
             margin-top: 2rem;
         }
 
+        .fire {
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            color: #ffffff00;
+            font-size: 28vw;
+            text-align: center;
+        }
+
+        .fire {
+            background-image: url(static/noise.jpg), url(static/noise.jpg), linear-gradient(#fff, #999);
+            background-blend-mode: difference, difference, normal;
+            filter: sepia(1) contrast(6);
+            animation: sliding 5s linear infinite;
+            display: none;
+        }
+
+        @keyframes sliding {
+            from { background-position: 1536px 9216px, 0 7168px, 0 0; }
+            to   { background-position: 512px 0, 1024px 0, 0 0; }
+        }
+
         @media (max-width: 768px) {
             .features {
                 flex-direction: column;
@@ -287,6 +312,7 @@
     </style>
 </head>
 <body>
+
     <header class="header">
         <div class="container nav">
             <div class="logo">Proczy</div>
@@ -295,11 +321,12 @@
                 <li><a href="#features" id="featuresbtn">Features</a></li>
                 <li><a href="#about" id="aboutbtn" onclick="alert('this page has a lot of comedy lol, im sorry, i wasnt too serious while making it, but i hope you enjoy it')">About</a></li> 
                 <li><a href="#" id="contactbtn">Contact</a></li> <!-- DONE todo: Replace this with a contact form or something idk--> <!-- wow i actually finished the todo im so cool fr-->
+                <li><a href="#" id="arsonbtn">Arson</a></li> <!-- ARSON, okay?-->
             </ul>
         </div>
     </header>
 
-    <main class="container main-content">
+    <main class="container main-content" id="main-contentcontainer">
         <section class="proxy-section" id="home">
             <h1>Proczy</h1>
             <p>Browse the web with a proxy or something idk</p>
@@ -330,6 +357,15 @@
             </div>
         </section>
     </main>
+
+    <div class="fire" id="arson">
+        <!--ARSON!-->
+        <p>
+            gay arson go brr
+        </p>
+    </div>
+
+    <!--haha funny placeholder text got arsoned lmao-->
 
     <footer>
         <p>&copy; 2025 ProSureString. Open Source Browsing, Unlimited Access or something idk.</p>
@@ -388,6 +424,18 @@
         const proxybtn = document.getElementById('proxybtn');
         proxybtn.addEventListener('click', () => {
             
+        });
+
+        const arsonbtn = document.getElementById('arsonbtn');
+        arsonbtn.addEventListener('click', () => {
+            if (document.getElementById('arson').style.display === 'block') {
+                document.getElementById('arson').style.display = 'none';
+                document.getElementById('main-contentcontainer').style.display = 'block';
+            } else {
+                document.getElementById('arson').style.display = 'block';
+                document.getElementById('main-contentcontainer').style.display = 'none';
+
+            }
         });
     </script>
 </body>

@@ -64,6 +64,9 @@ Default:
 - fix 301's
 
 
+## Credits
+Used the fire effect from [helderman/blend-fire](https://github.com/helderman/blend-fire). (pov: cyteon demand arson)
+
 ## Contributing
 
 1. Fork the repository

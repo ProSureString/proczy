@@ -6,3 +6,4 @@ requests
 typing-extensions
 urllib3
 bs4
+re
