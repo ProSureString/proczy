@@ -23,7 +23,7 @@ logger.addHandler(file_handler)
 MAX_REQUESTS = 200
 TIME_WINDOW = 60
 BLOCKED_IPS = ["0.69.42.0", "10.69.42.0"]
-REDIR_PREFIX = "http://127.0.0.1:8080/proxy/"
+REDIR_PREFIX = "https://3652-156-47-83-185.ngrok-free.app/"
 
 
 # Rate limiter for client IPs

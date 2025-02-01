@@ -3,13 +3,13 @@
 ## Features
 
 - HTTP/HTTPS Proxying
-- WebSocket Support
+- WebSocket Support(technically?)
 - Rate Limiting
 - IP Blocking
 - Advanced Logging
 - SSL/TLS Security
 - URL Rewriting
-- Authentication Hooks
+- Authentication Hooks(this is a blatant lie)
 
 ## Installation
 
