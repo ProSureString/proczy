@@ -153,9 +153,15 @@ class ProxyServer:
     def decompress_content(self, content: bytes, encoding: str) -> bytes:
         """Decompress response content."""
         if encoding == 'gzip':
-            return gzip.decompress(content)
+            try:
+                return gzip.decompress(content)
+            except Exception as e:
+                return content
         elif encoding == 'deflate':
-            return zlib.decompress(content)
+            try:
+                return zlib.decompress(content)
+            except Exception as e:
+                return content
         return content
     
     """
@@ -191,9 +197,9 @@ class ProxyServer:
         prefix = self.href_prefix
         html_content = ""
 
-        logger.info(f"Current URL: {current_url}")
+        logger.info(f"Current URL SRC: {current_url}")
         with open("test.txt", "a") as f:
-            f.write(f"Current URL: {current_url}\n")
+            f.write(f"Current URL SRC: {current_url}\n")
             
         try:
             html_content = html_content_b.decode('utf-8')
@@ -203,29 +209,32 @@ class ProxyServer:
 
 
         def replacement_function(match):
-            src = match.group(1)  
-            with open("test.txt", "a") as f:
-                f.write(f"Current src: {src}\n")
-            
-            print(src)
+            try:
+                src = match.group(1)  
+                with open("test.txt", "a") as f:
+                    f.write(f"Current src: {src}\n")
+                
+                print(src)
 
-            # absolute URLs
-            if src.startswith(('http://', 'https://')):
-                return f'src="{prefix}{src}"'
-            
-            # relative URLs
-            elif src.startswith('/'):
-                # gotta remove potential double slashes don't ask me why
-                clean_src = current_url.rstrip('/') + '/' + src.lstrip('/')
-                return f'src="{prefix}{clean_src}"'
-            
-            # relative URLs *without* leading slash
-            else:
-                clean_src = f"{current_url.rstrip('/')}/{src}"
-                return f'src="{prefix}{clean_src}"'
-        
-        # I *think* pattern should matche src="..." with any content inside the quotes(dpes)
-        pattern = r'src="([^"]*)"'
+                # absolute URLs
+                if src.startswith(('http://', 'https://')):
+                    return f'src="{prefix}{src}"'
+                
+                # relative URLs
+                elif src.startswith('/'):
+                    # gotta remove potential double slashes don't ask me why
+                    clean_src = current_url.rstrip('/') + '/' + src.lstrip('/')
+                    return f'src="{prefix}{clean_src}"'
+                
+                # relative URLs *without* leading slash
+                else:
+                    clean_src = f"{current_url.rstrip('/')}/{src}"
+                    return f'src="{prefix}{clean_src}"'
+            except Exception as e:
+                logger.error(f"Error replacing src: {e}")
+                return src
+        # I *think* pattern should matche src="..." (and ALSO now with single quotes!) with any content inside the quotes(dpes)
+        pattern = 'src="([^"]*)"|src=\'([^\']*)\''
 
         # replace all matches using the replacement function, pls work(SPOILER, IT WORKS NOW :3)
         return re.sub(pattern, replacement_function, html_content)
@@ -236,9 +245,9 @@ class ProxyServer:
 
         prefix = self.href_prefix
 
-        logger.info(f"Current URL: {current_url}")
+        logger.info(f"Current URL HREF: {current_url}")
         with open("test.txt", "a") as f:
-            f.write(f"Current URL: {current_url}\n")
+            f.write(f"Current URL HREF: {current_url}\n")
 
         """
         try:
@@ -270,8 +279,8 @@ class ProxyServer:
                 clean_href = f"{current_url.rstrip('/')}/{href}"
                 return f'href="{prefix}{clean_href}"'
         
-        # I *think* pattern should matche href="..." with any content inside the quotes(dpes)
-        pattern = r'href="([^"]*)"'
+        # I *think* pattern should matche href="..." and now with single quotes with any content inside the quotes(dpes)
+        pattern = 'href="([^"]*)"|href=\'([^\']*)\''
 
         # replace all matches using the replacement function, pls work(SPOILER, IT WORKS NOW :3)
         return re.sub(pattern, replacement_function, html_content)
